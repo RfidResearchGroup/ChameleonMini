@@ -35,6 +35,7 @@ typedef enum {
     BUTTON_ACTION_STORE_LOG,
     BUTTON_ACTION_CLEAR_LOG,
     BUTTON_ACTION_CLONE,
+    BUTTON_ACTION_CLONE_MFU,
 
     /* This has to be last element */
     BUTTON_ACTION_COUNT

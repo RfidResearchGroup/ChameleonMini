@@ -1,4 +1,5 @@
 #include "Reader14443A.h"
+#include "LEDHook.h"
 #include "Application.h"
 #include "ISO14443-3A.h"
 #include "../Codec/Reader14443-2A.h"
@@ -684,6 +685,7 @@ uint16_t Reader14443AAppProcess(uint8_t *Buffer, uint16_t BitCount) {
             return rVal;
         }
 
+        case Reader14443_Clone_MF_Ultralight:
         case Reader14443_Read_MF_Ultralight: {
             static uint8_t MFURead_CurrentAdress = 0;
             static uint8_t MFUContents[64];
@@ -718,18 +720,28 @@ uint16_t Reader14443AAppProcess(uint8_t *Buffer, uint16_t BitCount) {
                 if (MFURead_CurrentAdress == 16) {
                     Selected = false;
                     MFURead_CurrentAdress = 0;
-                    Reader14443CurrentCommand = Reader14443_Do_Nothing;
 
-                    char tmpBuf[135]; // 135 = 128 hex digits + 3 * \r\n + \0
-                    BufferToHexString(tmpBuf, 							135, 							MFUContents, 16);
-                    snprintf(tmpBuf + 32, 						135 - 32, 						"\r\n");
-                    BufferToHexString(tmpBuf + 32 + 2, 					135 - 32 - 2, 					MFUContents + 16, 16);
-                    snprintf(tmpBuf + 32 + 2 + 32, 				135 - 32 - 2 - 32, 				"\r\n");
-                    BufferToHexString(tmpBuf + 32 + 2 + 32 + 2, 			135 - 32 - 2 - 32 - 2, 			MFUContents + 32, 16);
-                    snprintf(tmpBuf + 32 + 2 + 32 + 2 + 32, 		135 - 32 - 2 - 32 - 2 - 32, 	"\r\n");
-                    BufferToHexString(tmpBuf + 32 + 2 + 32 + 2 + 32 + 2, 	135 - 32 - 2 - 32 - 2 - 32 - 2, MFUContents + 48, 16);
-                    CodecReaderFieldStop();
-                    CommandLinePendingTaskFinished(COMMAND_INFO_OK_WITH_TEXT_ID, tmpBuf);
+                    if (Reader14443CurrentCommand == Reader14443_Read_MF_Ultralight) { // dump
+                        Reader14443CurrentCommand = Reader14443_Do_Nothing;
+                        char tmpBuf[135]; // 135 = 128 hex digits + 3 * \r\n + \0
+                        BufferToHexString(tmpBuf, 							135, 							MFUContents, 16);
+                        snprintf(tmpBuf + 32, 						135 - 32, 						"\r\n");
+                        BufferToHexString(tmpBuf + 32 + 2, 					135 - 32 - 2, 					MFUContents + 16, 16);
+                        snprintf(tmpBuf + 32 + 2 + 32, 				135 - 32 - 2 - 32, 				"\r\n");
+                        BufferToHexString(tmpBuf + 32 + 2 + 32 + 2, 			135 - 32 - 2 - 32 - 2, 			MFUContents + 32, 16);
+                        snprintf(tmpBuf + 32 + 2 + 32 + 2 + 32, 		135 - 32 - 2 - 32 - 2 - 32, 	"\r\n");
+                        BufferToHexString(tmpBuf + 32 + 2 + 32 + 2 + 32 + 2, 	135 - 32 - 2 - 32 - 2 - 32 - 2, MFUContents + 48, 16);
+                        CodecReaderFieldStop();
+                        CommandLinePendingTaskFinished(COMMAND_INFO_OK_WITH_TEXT_ID, tmpBuf);
+                    } else { // clone
+                        Reader14443CurrentCommand = Reader14443_Do_Nothing;
+                        CodecReaderFieldStop();
+                        MemoryUploadBlock(&MFUContents, 0, 64);
+                        CommandLinePendingTaskFinished(COMMAND_INFO_OK_WITH_TEXT_ID, "Card Cloned to Slot");
+                        ConfigurationSetById(CONFIG_MF_ULTRALIGHT);
+                        MemoryStore();
+                        SettingsSave();
+                    }
                     return 0;
                 }
                 Buffer[0] = 0x30; // MiFare Ultralight read command
@@ -797,7 +809,9 @@ uint16_t Reader14443AAppProcess(uint8_t *Buffer, uint16_t BitCount) {
                 return BitCount;
             }
         }
-
+        /****************************************
+         * This function do simple cloning UID. *
+         ****************************************/
         case Reader14443_Identify_Clone: {
             if (Identify(Buffer, &BitCount)) {
                 if (CardCandidatesIdx == 1) {
@@ -805,17 +819,27 @@ uint16_t Reader14443AAppProcess(uint8_t *Buffer, uint16_t BitCount) {
                     switch (CardCandidates[0]) {
 #ifdef CONFIG_MF_ULTRALIGHT_SUPPORT
                         case CardType_NXP_MIFARE_Ultralight: {
+#ifdef CONFIG_MF_ULTRALIGHT_SUPPORT
                             cfgid = CONFIG_MF_ULTRALIGHT;
+#endif
                             // TODO: enter MFU clone mdoe
                             break;
                         }
+                        case CardType_NXP_MIFARE_DESFire_EV1: {
+#ifdef CONFIG_MF_ULTRALIGHT_SUPPORT
+                            cfgid = CONFIG_MF_ULTRALIGHT;
 #endif
+                            // Only set UL for DESFire_EV1 and read UID for some small tests - simple UID cloning
+                            break;
+                        }
                         case CardType_NXP_MIFARE_Classic_1k:
                         case CardType_Infineon_MIFARE_Classic_1k: {
                             if (CardCharacteristics.UIDSize == UIDSize_Single) {
+#ifdef CONFIG_MF_CLASSIC_1K_SUPPORT
                                 cfgid = CONFIG_MF_CLASSIC_1K;
-#ifdef CONFIG_MF_CLASSIC_1K_7B_SUPPORT
+#endif
                             } else if (CardCharacteristics.UIDSize == UIDSize_Double) {
+#ifdef CONFIG_MF_CLASSIC_1K_7B_SUPPORT
                                 cfgid = CONFIG_MF_CLASSIC_1K_7B;
 #endif
                             }
@@ -825,9 +849,11 @@ uint16_t Reader14443AAppProcess(uint8_t *Buffer, uint16_t BitCount) {
                         case CardType_Nokia_MIFARE_Classic_4k_emulated_6212:
                         case CardType_Nokia_MIFARE_Classic_4k_emulated_6131: {
                             if (CardCharacteristics.UIDSize == UIDSize_Single) {
+#ifdef CONFIG_MF_CLASSIC_4K_SUPPORT
                                 cfgid = CONFIG_MF_CLASSIC_4K;
-#ifdef CONFIG_MF_CLASSIC_1K_7B_SUPPORT
+#endif
                             } else if (CardCharacteristics.UIDSize == UIDSize_Double) {
+#ifdef CONFIG_MF_CLASSIC_4K_7B_SUPPORT
                                 cfgid = CONFIG_MF_CLASSIC_4K_7B;
 #endif
                             }
@@ -839,6 +865,8 @@ uint16_t Reader14443AAppProcess(uint8_t *Buffer, uint16_t BitCount) {
 
                     if (cfgid > -1) {
                         CommandLinePendingTaskFinished(COMMAND_INFO_OK_WITH_TEXT_ID, "Cloned OK!");
+                        /* Notify LED. blink when clone is done - ToDo: maybe use other LEDHook */
+                        LEDHook(LED_SETTING_CHANGE, LED_BLINK_2X);
                         ConfigurationSetById(cfgid);
                         ApplicationReset();
                         ApplicationSetUid(CardCharacteristics.UID);

@@ -151,4 +151,3 @@ void SystemInterruptInit(void) {
     PMIC.CTRL = PMIC_LOLVLEN_bm | PMIC_MEDLVLEN_bm | PMIC_HILVLEN_bm;
     sei();
 }
-
