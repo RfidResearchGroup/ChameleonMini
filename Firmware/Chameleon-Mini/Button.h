@@ -11,7 +11,7 @@
 #include "Common.h"
 
 typedef enum {
-    BUTTON_R_PRESS_SHORT =0,
+    BUTTON_R_PRESS_SHORT = 0,
     BUTTON_R_PRESS_LONG,
     BUTTON_L_PRESS_SHORT,
     BUTTON_L_PRESS_LONG,

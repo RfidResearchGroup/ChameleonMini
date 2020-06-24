@@ -605,7 +605,7 @@ uint16_t MifareClassicAppProcess(uint8_t *Buffer, uint16_t BitCount) {
             if (ISO14443AWakeUp(Buffer, &BitCount, CardATQAValue, FromHalt)) {
                 State = STATE_READY1;
                 return BitCount;
-            } else if (Buffer[0] == CMD_CHINESE_UNLOCK && bUidMode){
+            } else if (Buffer[0] == CMD_CHINESE_UNLOCK && bUidMode) {
                 State = STATE_CHINESE_IDLE;
                 Buffer[0] = ACK_VALUE;
                 return ACK_NAK_FRAME_SIZE;
@@ -740,7 +740,7 @@ uint16_t MifareClassicAppProcess(uint8_t *Buffer, uint16_t BitCount) {
             if (ISO14443AWakeUp(Buffer, &BitCount, CardATQAValue, FromHalt)) {
                 State = FromHalt ? STATE_HALT : STATE_IDLE;
                 return ISO14443A_APP_NO_RESPONSE;
-            }else if (Buffer[0] == CMD_CHINESE_UNLOCK && bUidMode) {
+            } else if (Buffer[0] == CMD_CHINESE_UNLOCK && bUidMode) {
                 State = STATE_CHINESE_IDLE;
                 Buffer[0] = ACK_VALUE;
                 return ACK_NAK_FRAME_SIZE;
@@ -944,9 +944,9 @@ uint16_t MifareClassicAppProcess(uint8_t *Buffer, uint16_t BitCount) {
                 /* Just reset on authentication error. */
                 State = STATE_IDLE;
 
-				//	detection mode, communication can continue
-				if (DetectionMode)
-					State = STATE_ACTIVE;
+                //	detection mode, communication can continue
+                if (DetectionMode)
+                    State = STATE_ACTIVE;
             }
             break;
 
@@ -1020,20 +1020,19 @@ uint16_t MifareClassicAppProcess(uint8_t *Buffer, uint16_t BitCount) {
                 }
             } else if (Buffer[0] == CMD_WRITE) {
                 if (ISO14443ACheckCRCA(Buffer, CMD_WRITE_FRAME_SIZE)) {
-					//	not allow to write block 0
-					if (Buffer[1] == 0x00) {
-						State = STATE_HALT;
-						Buffer[0] = NAK_NOT_AUTHED ^ Crypto1Nibble();
-						return ACK_NAK_FRAME_SIZE;
-					} 
-					else {
-						DetectionLogToFlash(LOG_INFO_APP_CMD_WRITE, Buffer, 2);
-						/* Write command. Store the address and prepare for the upcoming data.
-						 * Respond with ACK. */
-						CurrentAddress = Buffer[1];
-						State = STATE_WRITE;
-						Buffer[0] = ACK_VALUE ^ Crypto1Nibble();
-					}
+                    //	not allow to write block 0
+                    if (Buffer[1] == 0x00) {
+                        State = STATE_HALT;
+                        Buffer[0] = NAK_NOT_AUTHED ^ Crypto1Nibble();
+                        return ACK_NAK_FRAME_SIZE;
+                    } else {
+                        DetectionLogToFlash(LOG_INFO_APP_CMD_WRITE, Buffer, 2);
+                        /* Write command. Store the address and prepare for the upcoming data.
+                         * Respond with ACK. */
+                        CurrentAddress = Buffer[1];
+                        State = STATE_WRITE;
+                        Buffer[0] = ACK_VALUE ^ Crypto1Nibble();
+                    }
                 } else {
                     LogEntry(LOG_ERR_APP_CHECKSUM_FAIL, Buffer, 4);
                     Buffer[0] = NAK_CRC_ERROR ^ Crypto1Nibble();
