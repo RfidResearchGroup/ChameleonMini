@@ -23,7 +23,7 @@ Most information can be found on **[Here](http://chameleontiny.com/)**
 
 Our APP can be found here: **[Here](https://play.google.com/store/apps/details?id=com.proxgrind.chameleon)**
 
-Dropbox download for all relevant files: 
+Dropbox download for all relevant files: [Link-Broken]
 ----------------------------------------
 **[Here](https://www.dropbox.com/s/xt2o9ugalaam4xu/REV.G%20User%20Manual%2020200309.zip?dl=0)** **Dropbox**
 
@@ -87,7 +87,7 @@ Google Store:**[Here](https://play.google.com/store/apps/details?id=com.proxgrin
 
 (2) Connect the Chameleon MINI or TINY using the Android APP.
 
-USB port direct connection: Both the Chameleon MINI and TINY support direct connection to the mobile phone USB port. For the MINI, an additional OTG adapter needs to be purchased. TINY uses its own dual-headed TYPEC data cable to connect directly to TYPEC mobile phones.
+USB port direct connection: Both the Chameleon MINI and TINY support direct connection to the mobile phone USB port. For the MINI, an additional OTG adapter needs to be purchased. TINY uses its own dual-headed TYPE-C data cable to connect directly to TYPE-C mobile phones.
 Bluetooth connection: Chameleon MINI has built-in Bluetooth BLE4.0. Press any button first to wake up Bluetooth. Turn on Bluetooth on your Android phone and the app will automatically connect.
 
 (3) Use Android APP to enable detection mode.
@@ -109,9 +109,9 @@ Note: Multiple red LEDs are on at the same time during detection, which means th
 (5) Use Android APP to import existing card data files in batches.
 
  Use QQ to send the card data file to the mobile phone QQ, or connect the mobile phone to the computer and transfer the file to any directory on the mobile phone.
-Open the app, click the "DUMP" column below, click the "SCanner" in the "plus sign" in the upper right corner, click the three horizontal line buttons in the upper left corner, and select this phone. Then select the root directory of the QQ receiving file or the previously copied directory, and click Allow Access. All card data files will be automatically scanned into the "DUMP file" interface, which can be uploaded or edited at will. 
+Open the app, click the "DUMP" column below, click the "Scanner" in the "plus sign" in the upper right corner, click the three horizontal line buttons in the upper left corner, and select this phone. Then select the root directory of the QQ receiving file or the previously copied directory, and click Allow Access. All card data files will be automatically scanned into the "DUMP file" interface, which can be uploaded or edited at will. 
 
-Click the card data file in the “DUM” column below, and click “Upload” below to upload to the card slot corresponding to the chameleon.
+Click the card data file in the “DUMP” column below, and click “Upload” below to upload to the card slot corresponding to the chameleon.
 
 **2. Introduction to UID mode and SAK mode**
 
@@ -202,9 +202,9 @@ In the closed state, press and hold the yellow button near the USB, and then let
 (2 ) ChameleonTiny
 
 Turn on the chameleon:
-In the closed state, press the A button once to turn on the chameleon power. The red LED lights up to indicate the slot number. After 5 seconds without operation, it will automatically sleep and shut down.
+In the off/standby state, press the A button once to turn on the chameleon power. The red LED lights up to indicate the slot number. After 5 seconds without operation, it will automatically sleep and shut down. This can be adjusted in Android Application.
 DFU firmware upgrade status:
-In the off state, hold down the B button and connect the USB. You can enter the DFU flash firmware mode.
+In the off state, hold down the B button and connect the USB. You can enter the DFU mode to flash new firmware .
 
  **Appendix**
  =================

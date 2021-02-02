@@ -172,10 +172,15 @@ INLINE void FRAMWrite(const void *Buffer, uint16_t Address, uint16_t ByteCount) 
     SPIWriteBlock(Buffer, ByteCount);
 
     FRAM_PORT.OUTSET = FRAM_CS;
-
+#ifdef CONFIG_ISO14443A_READER_SUPPORT
     if (0 == Address && GlobalSettings.ActiveSettingPtr->Configuration != CONFIG_ISO14443A_READER) {
         ConfigurationSetById(GlobalSettings.ActiveSettingPtr->Configuration);
     }
+#else
+    if (0 == Address) {
+        ConfigurationSetById(GlobalSettings.ActiveSettingPtr->Configuration);
+    }
+#endif
 }
 
 INLINE void FlashRead(void *Buffer, uint32_t Address, uint16_t ByteCount) {
@@ -421,8 +426,10 @@ void MemoryRecall(void) {
     if (GlobalSettings.ActiveSettingIdx < SETTINGS_COUNT)
         FlashToFRAM((uint32_t) GlobalSettings.ActiveSettingIdx * MEMORY_SIZE_PER_SETTING, ActiveConfiguration.MemorySize);
 
+#ifdef CONFIG_ISO14443A_READER_SUPPORT
     if (GlobalSettings.ActiveSettingPtr->Configuration != CONFIG_ISO14443A_READER)
         ActiveConfiguration.ApplicationInitFunc();
+#endif
 
     SystemTickClearFlag();
 }

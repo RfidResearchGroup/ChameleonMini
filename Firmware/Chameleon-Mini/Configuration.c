@@ -505,10 +505,14 @@ void ConfigurationSetById(ConfigurationEnum Configuration) {
              &ConfigurationTable[Configuration], sizeof(ConfigurationType));
 
     //    Configure antenna load as appropriate
+#ifdef CONFIG_ISO14443A_READER_SUPPORT
     if (Configuration == CONFIG_ISO14443A_READER)
         PORTC.OUTCLR = PIN7_bm;
     else
         PORTC.OUTSET = PIN7_bm;
+#else
+    PORTC.OUTSET = PIN7_bm;
+#endif
 
     CodecInit();
     ApplicationInit();
@@ -523,7 +527,11 @@ bool ConfigurationSetByName(const char *Configuration) {
 
     if (MapTextToId(ConfigurationMap, ARRAY_COUNT(ConfigurationMap), Configuration, &Id)) {
         //    The last configuration can only be configured as a reader
+#ifdef CONFIG_ISO14443A_READER_SUPPORT
         if (GlobalSettings.ActiveSettingIdx >= SETTINGS_COUNT && Id != CONFIG_ISO14443A_READER) {
+#else
+        if (GlobalSettings.ActiveSettingIdx >= SETTINGS_COUNT) {
+#endif
             return false;
         }
         ConfigurationSetById(Id);

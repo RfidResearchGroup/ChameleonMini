@@ -5,8 +5,8 @@
  *      Author: skuser
  *
  *  ChangeLog
- *    2019-09-22    willok    加入了UID模式开关，加入了SAK模式开关
- *    2019-10-05    Willok    将侦测卡功能整合进来，以减少程序大小
+ *    2019-09-22    willok    Added UID mode switch and SAK mode switch
+ *    2019-10-05    Willok    Integrate detection card function to reduce program size
  *
  */
 
@@ -82,7 +82,7 @@
 #define CMD_TRANSFER                0xB0
 #define CMD_TRANSFER_FRAME_SIZE     2         /* Bytes without CRCA */
 
-//	白卡相关的指令
+//	White card related instructions
 #define CMD_CHINESE_UNLOCK          0x40
 #define CMD_CHINESE_WIPE            0x41
 #define CMD_CHINESE_UNLOCK_RW       0x43
@@ -454,7 +454,7 @@ void DetectionInit(void) {
 
 // Download log
 bool RfLogMemLoadBlock(void *Buffer, uint32_t BlockAddress, uint16_t ByteCount) {
-    //    位置超出尾部了，结束
+    //    The position is beyond the end
     if (BlockAddress < (DetectionLogPtr - FRAM_DETECTION_START_ADDR)) {
         MemoryReadBlock(Buffer, BlockAddress + FRAM_DETECTION_START_ADDR, ByteCount);
         if (0 == BlockAddress)

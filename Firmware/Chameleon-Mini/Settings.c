@@ -39,7 +39,9 @@ SettingsType EEMEM StoredSettings = {
             .PendingTaskTimeout = DEFAULT_PENDING_TASK_TIMEOUT,
             .ReaderThreshold = DEFAULT_READER_THRESHOLD,
             .bSakMode = 0,
-        },
+        }
+#ifdef CONFIG_ISO14443A_READER_SUPPORT
+        ,
         //    In the last configuration, there is no storage space. This is used as the card reader mode only
         [SETTINGS_COUNT] =
         {
@@ -55,6 +57,7 @@ SettingsType EEMEM StoredSettings = {
             .ReaderThreshold = DEFAULT_READER_THRESHOLD,
             .bSakMode = 0,
         }
+#endif
     }
 };
 
@@ -77,7 +80,9 @@ void SettingsLoad(void) {
             GlobalSettings.Settings[i].PendingTaskTimeout = DEFAULT_PENDING_TASK_TIMEOUT;
             GlobalSettings.Settings[i].ReaderThreshold = DEFAULT_READER_THRESHOLD;
         }
+#ifdef CONFIG_ISO14443A_READER_SUPPORT
         GlobalSettings.Settings[SETTINGS_COUNT].Configuration = CONFIG_ISO14443A_READER;
+#endif
 
         SettingsSave();
     }

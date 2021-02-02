@@ -193,7 +193,7 @@ check_size:
 	if [ ! -f $(TARGET).elf ]; then \
 		exit 0; \
 	fi; \
-	PROGMEM_SIZE=$$(avr-size --mcu=atxmega128a4u --format=avr $(TARGET).elf | grep -oP "\d+" | sed -n 3p); \
+	PROGMEM_SIZE=$$(avr-size --format=avr $(TARGET).elf | grep -oP "\d+" | sed -n 3p); \
 	MAX_PRGMEM_SIZE=$$(printf "%d\n" $(FLASH_DATA_ADDR)); \
 	if [ $$PROGMEM_SIZE -gt $$MAX_PRGMEM_SIZE ]; then \
 		echo "make: *** $(TARGET).elf Application Section size $$PROGMEM_SIZE excedes maximum allowed $$MAX_PRGMEM_SIZE. Please disable some features in Makefile"; \
