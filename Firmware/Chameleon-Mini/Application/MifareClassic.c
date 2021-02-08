@@ -275,6 +275,7 @@ static enum {
     STATE_READY2,
     STATE_ACTIVE,
     STATE_AUTHING,
+    STATE_AUTHING_NESTED,
     STATE_AUTHED_IDLE,
     STATE_WRITE,
     STATE_INCREMENT,
@@ -583,6 +584,9 @@ void MifareClassicAppTask(void) {
 #define        MF_AUTH_KEYB    0x01
 
 uint8_t AuthDataLog[22];
+uint8_t CardNonce[8];
+uint8_t Key[6];
+uint8_t Uid[4];
 
 uint16_t MifareClassicAppProcess(uint8_t *Buffer, uint16_t BitCount) {
     /* Wakeup and Request may occure in all states */
@@ -771,9 +775,6 @@ uint16_t MifareClassicAppProcess(uint8_t *Buffer, uint16_t BitCount) {
                         uint16_t KeyOffset = (Buffer[0] == CMD_AUTH_A ? MEM_KEY_A_OFFSET : MEM_KEY_B_OFFSET);
                         uint16_t AccessOffset = MEM_KEY_A_OFFSET + MEM_KEY_SIZE;
                         uint16_t SectorStartAddress;
-                        uint8_t Key[6];
-                        uint8_t Uid[4];
-                        uint8_t CardNonce[8];
                         uint8_t Sector = Buffer[1];
 
                         /* Fix for MFClassic 4k cards */
@@ -810,12 +811,6 @@ uint16_t MifareClassicAppProcess(uint8_t *Buffer, uint16_t BitCount) {
 
                         Crypto1PRNG(ReaderResponse, 64);
 
-                        /* Precalculate our response from the reader response */
-                        for (uint8_t i = 0; i < sizeof(CardResponse); i++)
-                            CardResponse[i] = ReaderResponse[i];
-
-                        Crypto1PRNG(CardResponse, 32);
-
                         /* Respond with the random card nonce and expect further authentication
                          * form the reader in the next frame. */
                         State = STATE_AUTHING;
@@ -829,9 +824,6 @@ uint16_t MifareClassicAppProcess(uint8_t *Buffer, uint16_t BitCount) {
                         AuthDataLog[0] = 0x60 + KeyInUse;
                         AuthDataLog[1] = Sector;
                         memcpy(&AuthDataLog[6], CardNonce, 4);
-
-                        /* Setup crypto1 cipher. Discard in-place encrypted CardNonce. */
-                        Crypto1Setup(Key, Uid, CardNonce);
 
                         return CMD_AUTH_RB_FRAME_SIZE * BITS_PER_BYTE;
                     } else {
@@ -900,6 +892,19 @@ uint16_t MifareClassicAppProcess(uint8_t *Buffer, uint16_t BitCount) {
             break;
 
         case STATE_AUTHING:
+        case STATE_AUTHING_NESTED:
+            /* Calculating authentification data*/
+            if (State == STATE_AUTHING){
+                /* Precalculate our response from the reader response */
+                for (uint8_t i = 0; i < sizeof(CardResponse); i++)
+                    CardResponse[i] = ReaderResponse[i];
+
+                Crypto1PRNG(CardResponse, 32);
+
+                /* Setup crypto1 cipher. Discard in-place encrypted CardNonce. */
+                Crypto1Setup(Key, Uid, CardNonce);
+            }
+
             memcpy(&AuthDataLog[10], Buffer, 8);
             /* Reader delivers an encrypted nonce. We use it
             * to setup the crypto1 LFSR in nonlinear feedback mode.
@@ -1094,9 +1099,6 @@ uint16_t MifareClassicAppProcess(uint8_t *Buffer, uint16_t BitCount) {
                     uint16_t KeyOffset = (Buffer[0] == CMD_AUTH_A ? MEM_KEY_A_OFFSET : MEM_KEY_B_OFFSET);
                     uint16_t AccOffset = MEM_KEY_A_OFFSET + MEM_KEY_SIZE;
                     uint16_t SectorStartAddress;
-                    uint8_t Key[6];
-                    uint8_t Uid[4];
-                    uint8_t CardNonce[8];
                     uint8_t Sector = Buffer[1];
 
                     /* Fix for MFClassic 4k cards */
@@ -1157,7 +1159,7 @@ uint16_t MifareClassicAppProcess(uint8_t *Buffer, uint16_t BitCount) {
                     Buffer[ ISO14443A_BUFFER_PARITY_OFFSET + 1] =  CardNonce[5];
                     Buffer[ ISO14443A_BUFFER_PARITY_OFFSET + 2] =  CardNonce[6];
                     Buffer[ ISO14443A_BUFFER_PARITY_OFFSET + 3] =  CardNonce[7];
-                    State = STATE_AUTHING;
+                    State = STATE_AUTHING_NESTED;
 
                     return CMD_AUTH_RB_FRAME_SIZE * BITS_PER_BYTE | ISO14443A_APP_CUSTOM_PARITY;
                 } else {
