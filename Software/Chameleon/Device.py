@@ -28,6 +28,7 @@ class Device:
     COMMAND_RED_LED = "LEDRED"
     COMMAND_THRESHOLD = "THRESHOLD"
     COMMAND_UPGRADE = "upgrade"
+    COMMAND_CLEAR = "CLEAR"
 
     STATUS_CODE_OK = 100
     STATUS_CODE_OK_WITH_TEXT = 101
@@ -207,6 +208,9 @@ class Device:
 
     def cmdClearLog(self):
         return self.execCmd(self.COMMAND_LOG_CLEAR)
+    
+    def cmdClear(self):
+        return self.execCmd(self.COMMAND_CLEAR)
 
     def cmdLogMode(self, newLogMode):
         return self.getSetCmd(self.COMMAND_LOGMODE, newLogMode)

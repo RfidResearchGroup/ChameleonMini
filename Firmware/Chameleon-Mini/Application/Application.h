@@ -21,6 +21,7 @@
 #include "TITagitstandard.h"
 #include "Sniff14443A.h"
 #include "EM4233.h"
+#include "NTAG215.h"
 
 /* Function wrappers */
 INLINE void ApplicationInit(void) {

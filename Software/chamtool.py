@@ -182,6 +182,10 @@ def cmdUpgrade(chameleon, arg):
         print ("Device changed into Upgrade Mode")
     exit(0)
 
+def cmdClear(chameleon, arg):
+    chameleon.cmdClear()
+    return "Slot has been cleared"
+
 # Custom class for argparse
 class CmdListAction(argparse.Action):
     def __init__(self, option_strings, dest, default=False, required=False,
@@ -224,6 +228,7 @@ def main():
     cmdArgGroup.add_argument("-rl",  "--rled",       dest="rled",        action=CmdListAction, metavar="FUNCTION", nargs='?', help="retrieve or set the current red led function")
     cmdArgGroup.add_argument("-th",  "--threshold",  dest="threshold",   action=CmdListAction, nargs='?', help="retrieve or set the threshold")
     cmdArgGroup.add_argument("-ug",  "--upgrade",    dest="upgrade",     action=CmdListAction, nargs=0,   help="set the micro Controller to upgrade mode")
+    cmdArgGroup.add_argument("-cl",  "--clear",    dest="clear",     action=CmdListAction, nargs=0,   help="clear the slot")
 
     args = argParser.parse_args()
 
@@ -258,6 +263,7 @@ def main():
                 "rled"      : cmdRedLED,
                 "threshold" : cmdThreshold,
                 "upgrade"   : cmdUpgrade,
+                "clear"     : cmdClear,
             }
 
             if hasattr(args, "cmdList"):
